@@ -1,0 +1,29 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+boto3 = "*"
+uvicorn = "*"
+dynaconf = "*"
+python-json-logger = "*"
+sqlalchemy = {extras = ["asyncio"] }
+asyncpg = "*"
+qdrant-client = {extras = ["fastembed"], version = "*"}
+pandas = "*"
+pymupdf = "*"
+unstructured = {extras = ["all-docs"], version = "*"}
+
+[dev-packages]
+black = "*"
+mypy = "*"
+flake8 = "*"
+types-requests = "*"
+psycopg2-binary = "*"
+alembic = "*"
+isort = "*"
+
+[requires]
+python_version = "3.10"

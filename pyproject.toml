@@ -1,0 +1,28 @@
+[project]
+name="api-service"
+version="0.0.1"
+description="API service that powers the web app for ragit"
+readme="README.md"
+requires-python = ">=3.10"
+authors = [
+  {name = "Akash Mishra", email = "akash@ragit.io" }
+]
+maintainers = [
+  {name = "Akash Mishra", email = "akash@ragit.io" }
+]
+dependencies = [
+  
+]
+
+[project.scripts]
+api-service = "api_service.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[[tool.mypy.overrides]]
+module = [
+    "dynaconf",
+    "jose"
+]
+ignore_missing_imports = true
