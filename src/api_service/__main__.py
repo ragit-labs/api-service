@@ -5,10 +5,11 @@ import sys
 import uvicorn
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from .dependencies.auth import login_required
 
 from .middlewares.logging import LoggingMiddleware
 from .settings import settings
-from .routers import file, context, project, embeddings
+from .routers import file, context, project, embeddings, auth
 
 logging_config = {
     "version": 1,
@@ -46,10 +47,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(file.router)
-app.include_router(context.router)
-app.include_router(project.router)
-app.include_router(embeddings.router)
+app.include_router(file.router, dependencies=[Depends(login_required)])
+app.include_router(context.router, dependencies=[Depends(login_required)])
+app.include_router(project.router, dependencies=[Depends(login_required)])
+app.include_router(embeddings.router, dependencies=[Depends(login_required)])
+app.include_router(auth.router)
 
 
 def main():

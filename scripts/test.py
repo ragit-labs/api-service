@@ -1,7 +1,10 @@
-from api_service.database import db as database
 import asyncio
-from db.models import Context, File, file_context_association
+
 from sqlalchemy import select
+
+from api_service.database import db as database
+from db.models import Context, File, file_context_association
+
 
 async def main():
     async with database.session() as session:
@@ -10,5 +13,6 @@ async def main():
         contexts = res.scalars().all()
         for context in contexts:
             print(context)
+
 
 asyncio.run(main())

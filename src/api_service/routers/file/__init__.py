@@ -9,13 +9,14 @@ from sqlalchemy import select
 from .types import GetPresignedUrlRequest, MarkUploadStatusRequest, GetFilesRequest, ProjectFilesRequest, ContextFilesRequest, DeleteFileRequest
 from datetime import datetime
 from .utils import get_project_files, get_context_files
+from ...utils.misc import sanitize_string
 
 router = APIRouter(tags=["s3", "data-store"])
 
 @router.post("/files/get_presigned_url")
 async def get_presigned_url(request: Request, data: GetPresignedUrlRequest):
-    key = data.key.strip().replace(" ", "-")
-    key_sanitized = ''.join(e for e in key if e.isalnum() or (e in ['.', '-', '_']))
+    key = data.key
+    key_sanitized = sanitize_string(key)
     prefix = ''.join(random.choice(string.ascii_letters) for i in range(6))
     key_sanitized = prefix + "_" + key_sanitized
     expiration = data.expiration

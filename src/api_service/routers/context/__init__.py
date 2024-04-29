@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Request, HTTPException
 from api_service.clients import s3_client, qdrant
-from db.models import Context, File, FileContext
+from db.models import Context, File, ContextFile
 from datetime import datetime
 from api_service.database import db
-from db.enums import EmbeddingStatus
+from db.enums import EmbeddingStatus, DocumentEmbeddingDistanceMetric
 from .types import CreateContextRequest, GetContextsRequest, GetContextsRequest, AddFileRequest, ProjectsContextRequest, ContextRequest
 from sqlalchemy import select
-from api_service.types.embedding_model import EmbeddingModel
+import io
+from qdrant_client.models import VectorParams
 
-from .utils import get_context, get_project_contexts
+from .utils import get_context_by_readable_id, get_project_contexts, partition_and_insert
 
 router = APIRouter(tags=["context"])
 
@@ -28,24 +29,47 @@ async def create_context(request: Request, data: CreateContextRequest):
         if get_context_result is not None:
             raise HTTPException(status_code=409, detail=f"Context by the name {data.name} already exists in this project.")
         
+        last_context_query = select(Context).where(Context.project_id == data.project_id).order_by(Context.id.desc()).limit(1)
+        last_context_result = (await session.execute(last_context_query)).scalar_one_or_none()
+        readable_id = 1
+        if last_context_result is not None:
+            readable_id = last_context_result.readable_id + 1
+
         try:
             new_context = Context(
                 name=data.name,
                 description=data.description or "",
+                readable_id=readable_id,
                 project_id=data.project_id,
                 owner_id=data.owner_id,
-                metadata=data.extra_metadata or {},
+                search_mode=data.search_mode,
+                retrieval_length=data.retrieval_length,
+                docs_to_retrieve=data.docs_to_retrieve,
+                max_doc_length=data.max_doc_length,
+                doc_overlap_length=data.doc_overlap_length,
+                embedding_model=data.embedding_model,
+                embedding_dimension=data.embedding_dimension,
+                distance_metric=data.distance_metric,
+                extra_metadata=data.extra_metadata or {},
                 created_at=datetime.utcnow(),
+                last_refreshed_at=datetime.utcnow(),
             )
             session.add(new_context)
             await session.flush()
             await session.refresh(new_context)
             context_id = new_context.id
-            if qdrant.create_collection(context_id, vectors_config={
-                "distance": "Cosine",
-                "size": "768",
-                "on_disk": True
-            }):
+
+            distance_metric = "Cosine"
+            if data.distance_metric == DocumentEmbeddingDistanceMetric.COSINE:
+                distance_metric = "Cosine"
+            elif data.distance_metric == DocumentEmbeddingDistanceMetric.DOT:
+                distance_metric = "Dot"
+            elif data.distance_metric == DocumentEmbeddingDistanceMetric.EUCLIDEAN:
+                distance_metric = "Euclidean"
+
+            vc = VectorParams(size=data.embedding_dimension, distance=distance_metric, on_disk=True)
+
+            if qdrant.create_collection(context_id, vectors_config=vc):
                 await session.commit()
                 return {"id": str(context_id)}
             else:
@@ -55,13 +79,14 @@ async def create_context(request: Request, data: CreateContextRequest):
             raise HTTPException(status_code=500, detail=f"Could not create context. Error: {str(ex)}")
 
 
-@router.post("/context/get")
-async def get_all_contexts(request: Request, data: GetContextsRequest):
-    if type(data.where) is ProjectsContextRequest:
-        return await get_project_contexts(data.where)
-    
-    if type(data.where) is ContextRequest:
-        return await get_context(data.where)
+@router.get("/context/get/{project_id}/{readable_id}")
+async def get_context(request: Request, project_id: str, readable_id: int):
+    return await get_context_by_readable_id(project_id, readable_id)
+
+
+@router.get("/context/get/{project_id}")
+async def get_all_contexts(request: Request, project_id: str):
+    return await get_project_contexts(project_id)
 
 
 @router.post("/context/add_file")
@@ -82,14 +107,19 @@ async def add_file(request: Request, data: AddFileRequest):
         if get_file_result is None:
             raise HTTPException(status_code=404, detail="File not found.")
         
-        get_file_context_query = select(FileContext).where(FileContext.context_id == data.context_id, FileContext.file_id == data.file_id)
+        get_file_context_query = select(ContextFile).where(ContextFile.context_id == data.context_id, ContextFile.file_id == data.file_id)
         get_file_context_result = (await session.execute(get_file_context_query)).scalar_one_or_none()
         if get_file_context_result is not None:
             raise HTTPException(status_code=409, detail="File is already associated with the context.")
         
         try:
-            fc = FileContext(context_id=data.context_id, file_id=data.file_id, status=EmbeddingStatus.PENDING)
+            fc = ContextFile(context_id=data.context_id, file_id=data.file_id, status=EmbeddingStatus.PENDING)
             session.add(fc)
+
+            file_data = s3_client.download_file_as_obj(get_file_result.s3_key)
+            file_bytes = file_data['Body'].read()
+            file_stream = io.BytesIO(file_bytes)
+            partition_and_insert(file_stream, qdrant).delay()
             await session.commit()
             return {"status": True}
         except Exception as ex:

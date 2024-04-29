@@ -15,6 +15,9 @@ qdrant-client = {extras = ["fastembed"], version = "*"}
 pandas = "*"
 pymupdf = "*"
 unstructured = {extras = ["all-docs"], version = "*"}
+celery = {extras = ["redis"], version = "*"}
+beautifulsoup4 = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
 
 [dev-packages]
 black = "*"

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException
 from api_service.clients import s3_client
+from api_service.clients.s3 import S3Client
 from api_service.database import db
 from sqlalchemy import select
 from .types import CreateEmbeddingsRequest
@@ -11,8 +12,39 @@ from unstructured.partition.pdf import partition_pdf
 from api_service.clients import qdrant
 from uuid import uuid4
 from .utils import create_text_embeddings
+from ...utils import batch
+from ...utils.decorators import fire_and_forget
+from qdrant_client.models import PointStruct
+from qdrant_client import QdrantClient
 
 router = APIRouter(tags=["embeddings", "vector-store"])
+
+
+@fire_and_forget
+def partition_and_insert(file_stream: io.BytesIO, qc: QdrantClient, batch_size: int = 100):
+    partitions = partition_pdf(file=file_stream)
+    for partition_batch in batch(partitions, batch_size):
+        documents = []
+        metadata = []
+        for partition in partition_batch:
+            data = partition.to_dict()
+            documents.append(data['text'])
+            metadata.append(data['metadata'])
+        embeddings = create_text_embeddings(documents, max_length=768)
+        qc.upsert(
+            collection_name="test",
+            points=[
+                PointStruct(
+                    id=str(uuid4()),
+                    vector=data[0].tolist(),
+                    payload={
+                        "document": data[1],
+                        **data[2],
+                    }
+                ) for data in zip(embeddings, documents, metadata)
+            ]
+        )
+
 
 @router.post("/embeddings/create")
 async def create_embeddings(request: Request, data: CreateEmbeddingsRequest):
@@ -34,20 +66,4 @@ async def create_embeddings(request: Request, data: CreateEmbeddingsRequest):
         file_data = s3_client.download_file_as_obj(file.s3_key)
         file_bytes = file_data['Body'].read()
         file_stream = io.BytesIO(file_bytes)
-        partitions = partition_pdf(file=file_stream)
-        
-        documents = []
-        metadata = []
-        
-        for partition in partitions:
-            data = partition.to_dict()
-            documents.append(data['text'])
-            metadata.append(data['metadata'])
-        embeddings = await create_text_embeddings(documents, max_length=384)
-        for embedding in embeddings:
-            print(embedding)
-        # qdrant.add(
-        #     collection_name=str(context.id),
-        #     documents=documents,
-        #     metadata=metadata,
-        # )
+        partition_and_insert(file_stream, qdrant)
