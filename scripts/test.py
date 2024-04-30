@@ -3,7 +3,7 @@ import asyncio
 from sqlalchemy import select
 
 from api_service.database import db as database
-from db.models import Context, File, file_context_association
+from ragit_db.models import Context, File, file_context_association
 
 
 async def main():

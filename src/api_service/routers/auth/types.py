@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 
 
-
 class SignupRequest(BaseModel):
     email: str = Field(..., title="Email", description="User's Email")
     password: str = Field(..., title="Password", description="User's Password")

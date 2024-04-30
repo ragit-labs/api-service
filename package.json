@@ -3,9 +3,9 @@
     "version": "0.0.1",
     "description": "Ragit API Service",
     "scripts": {
-      "format": "isort **/*.py && black **/*.py",
-      "lint": "flake8 src/**/*.py migrations/**/*.py",
-      "mypy": "mypy src/",
+      "format": "poetry run isort src && poetry run black src",
+      "lint": "poetry run flake8 src",
+      "mypy": "poetry run mypy src",
       "test": "npm run lint && npm run mypy"
     },
     "author": "Akash Mishra"

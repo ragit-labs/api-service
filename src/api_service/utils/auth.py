@@ -1,10 +1,13 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-from db.models import User
-from sqlalchemy import select
-from api_service.database import db
+
+from ragit_db.models import User
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
+from sqlalchemy import select
+
+from api_service.database import db
+
 from ..constants import JWT_ALGORITHM, JWT_DEFAULT_EXPIRY, JWT_SECRET_KEY
 
 
@@ -33,8 +36,11 @@ async def parse_user_id_from_token(token: str):
         raise credentials_exception
     return user_id
 
+
 async def get_user_from_database_using_id(id: str):
     async with db.session() as session:
-        query = select(User.id, User.email, User.first_name, User.last_name, User.created_at).where(User.id == id)
+        query = select(
+            User.id, User.email, User.first_name, User.last_name, User.created_at
+        ).where(User.id == id)
         user = (await session.execute(query)).scalars().one_or_none()
         return user

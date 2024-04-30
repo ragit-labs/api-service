@@ -1,10 +1,16 @@
-from pydantic import BaseModel, Field
 from typing import Union
+
+from pydantic import BaseModel, Field
+
 
 class GetPresignedUrlRequest(BaseModel):
     key: str = Field(..., title="Key of the object in S3")
     expiration: int = Field(300, title="Expiration time in seconds")
-    project_id: str = Field(..., title="Project ID", description="ID of the project to which the context belongs")
+    project_id: str = Field(
+        ...,
+        title="Project ID",
+        description="ID of the project to which the context belongs",
+    )
 
 
 class MarkUploadStatusRequest(BaseModel):
@@ -20,7 +26,10 @@ class ContextFilesRequest(BaseModel):
 
 
 class GetFilesRequest(BaseModel):
-    where: Union[ProjectFilesRequest, ContextFilesRequest] = Field(..., title="Where to get files from")
+    where: Union[ProjectFilesRequest, ContextFilesRequest] = Field(
+        ..., title="Where to get files from"
+    )
+
 
 class DeleteFileRequest(BaseModel):
     file_id: str = Field(..., title="File ID")

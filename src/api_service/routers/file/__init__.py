@@ -1,23 +1,27 @@
-from fastapi import APIRouter, Request, HTTPException
-from api_service.clients import s3_client
 import random
 import string
-from db.models import Project, File
-from db.enums import FileStatus
-from api_service.database import db
-from sqlalchemy import select
-from .types import GetPresignedUrlRequest, MarkUploadStatusRequest, DeleteFileRequest
 from datetime import datetime
-from .utils import get_project_files, get_context_files
+
+from ragit_db.enums import FileStatus
+from ragit_db.models import File, Project
+from fastapi import APIRouter, HTTPException, Request
+from sqlalchemy import select
+
+from api_service.clients import s3_client
+from api_service.database import db
+
 from ...utils.misc import sanitize_string
+from .types import DeleteFileRequest, GetPresignedUrlRequest, MarkUploadStatusRequest
+from .utils import get_context_files, get_project_files
 
 router = APIRouter(tags=["s3", "data-store"])
+
 
 @router.post("/files/get_presigned_url")
 async def get_presigned_url(request: Request, data: GetPresignedUrlRequest):
     key = data.key
     key_sanitized = sanitize_string(key)
-    prefix = ''.join(random.choice(string.ascii_letters) for i in range(6))
+    prefix = "".join(random.choice(string.ascii_letters) for i in range(6))
     key_sanitized = prefix + "_" + key_sanitized
     expiration = data.expiration
 
@@ -40,8 +44,10 @@ async def get_presigned_url(request: Request, data: GetPresignedUrlRequest):
         await session.flush()
         await session.commit()
         await session.refresh(file)
-        return {"url": s3_client.create_presigned_url(key_sanitized, expiration), "file_id": str(file.id)}
-
+        return {
+            "url": s3_client.create_presigned_url(key_sanitized, expiration),
+            "file_id": str(file.id),
+        }
 
 
 @router.post("/files/complete_upload")

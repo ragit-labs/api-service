@@ -5,11 +5,11 @@ import sys
 import uvicorn
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .dependencies.auth import login_required
 
+from .dependencies.auth import login_required
 from .middlewares.logging import LoggingMiddleware
+from .routers import auth, context, embeddings, file, project
 from .settings import settings
-from .routers import file, context, project, embeddings, auth
 
 logging_config = {
     "version": 1,
@@ -55,6 +55,4 @@ app.include_router(auth.router)
 
 
 def main():
-    uvicorn.run(
-        "api_service.__main__:app", host="0.0.0.0", port=8000, reload=True
-    )
+    uvicorn.run("api_service.__main__:app", host="0.0.0.0", port=8000, reload=True)

@@ -1,24 +1,39 @@
-[project]
+[tool.poetry]
 name="api-service"
 version="0.0.1"
 description="API service that powers the web app for ragit"
 readme="README.md"
-requires-python = ">=3.10"
-authors = [
-  {name = "Akash Mishra", email = "akash@ragit.io" }
-]
-maintainers = [
-  {name = "Akash Mishra", email = "akash@ragit.io" }
-]
-dependencies = [
-  
-]
+authors = ["Akash Mishra <akash@ragit.io>"]
 
-[project.scripts]
-api-service = "api_service.__main__:main"
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+fastapi = "*"
+boto3 = "*"
+uvicorn = "*"
+dynaconf = "*"
+python-json-logger = "*"
+sqlalchemy = {extras = ["asyncio"], version = "*"}
+asyncpg = "*"
+qdrant-client = {extras = ["fastembed"], version = "*"}
+pandas = "*"
+pymupdf = "*"
+unstructured = {extras = ["all-docs"], version = "*"}
+celery = {extras = ["redis"], version = "*"}
+beautifulsoup4 = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+ragit-db = {"git" = "https://akashcodes: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@github.com/akashcodes/ragit-db.git", "branch" = "main"}
+fastembed = "^0.2.6"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.poetry.dev-dependencies]
+black = "*"
+mypy = "*"
+flake8 = "*"
+types-requests = "*"
+isort = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [[tool.mypy.overrides]]
 module = [
@@ -26,3 +41,6 @@ module = [
     "jose"
 ]
 ignore_missing_imports = true
+
+[tool.poetry.scripts]
+api-service = "api_service.__main__:main"

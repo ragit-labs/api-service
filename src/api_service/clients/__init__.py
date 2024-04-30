@@ -1,5 +1,7 @@
 from qdrant_client import QdrantClient
+
 from api_service.settings import settings
+
 from .s3 import S3Client
 
 qdrant = QdrantClient(settings.QDRANT_SERVER_URI)

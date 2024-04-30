@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Request, HTTPException, Depends
-from ...dependencies.auth import login_required
+from datetime import datetime, timedelta
+
+from ragit_db.enums import ProjectPermission
+from ragit_db.models import Project, User, UserProject
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
-from db.models import User, Project, UserProject
-from db.enums import ProjectPermission
-from api_service.database import db
-from .types import SignupRequest, LoginRequest
-from datetime import datetime
 from sqlalchemy import select
-from datetime import timedelta
+
+from api_service.database import db
+
 from ...constants import ACCESS_TOKEN_EXPIRE_MINUTES
+from ...dependencies.auth import login_required
 from ...utils.auth import create_access_token, get_user_from_database_using_id
 from ...utils.misc import sanitize_string
+from .types import LoginRequest, SignupRequest
+
 router = APIRouter(tags=["auth", "login"])
 
 
@@ -22,7 +25,9 @@ async def signup(request: Request, data: SignupRequest):
         user = (await session.execute(user_query)).scalar_one_or_none()
 
         if user is not None:
-            raise HTTPException(status_code=409, detail="User with this email already exists")
+            raise HTTPException(
+                status_code=409, detail="User with this email already exists"
+            )
 
         user = User(
             email=data.email,
@@ -76,11 +81,13 @@ async def login(request: Request, data: LoginRequest):
         user = (await session.execute(user_query)).scalar_one_or_none()
 
         if user is None:
-            raise HTTPException(status_code=404, detail="User with this email does not exist")
+            raise HTTPException(
+                status_code=404, detail="User with this email does not exist"
+            )
 
         if user.password != data.password:
             raise HTTPException(status_code=401, detail="Password is incorrect")
-        
+
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             data={"user_id": str(user.id)}, expires_delta=access_token_expires
