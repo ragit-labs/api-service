@@ -6,7 +6,7 @@ from db.models import Project, File
 from db.enums import FileStatus
 from api_service.database import db
 from sqlalchemy import select
-from .types import GetPresignedUrlRequest, MarkUploadStatusRequest, GetFilesRequest, ProjectFilesRequest, ContextFilesRequest, DeleteFileRequest
+from .types import GetPresignedUrlRequest, MarkUploadStatusRequest, DeleteFileRequest
 from datetime import datetime
 from .utils import get_project_files, get_context_files
 from ...utils.misc import sanitize_string
@@ -27,14 +27,13 @@ async def get_presigned_url(request: Request, data: GetPresignedUrlRequest):
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
 
-        url = s3_client.create_presigned_url(key_sanitized, expiration)
-
         file = File(
-            project_id=data.project_id,
             name=key,
             s3_key=key_sanitized,
             status=FileStatus.PENDING,
             description="",
+            project_id=data.project_id,
+            owner_id=request.state.user_id,
             created_at=datetime.utcnow(),
         )
         session.add(file)
@@ -58,12 +57,14 @@ async def mark_upload_success(request: Request, data: MarkUploadStatusRequest):
         return {"status": True}
 
 
-@router.post("/files/get")
-async def mark_upload_success(request: Request, data: GetFilesRequest):
-    if type(data.where) is ProjectFilesRequest:
-        return await get_project_files(data.where)
-    if type(data.where) is ContextFilesRequest:
-        return await get_context_files(data.where)
+@router.get("/files/get/{project_id}")
+async def get_project_files_(request: Request, project_id: str):
+    return await get_project_files(project_id)
+
+
+@router.get("/files/get/{project_id}/{context_id}")
+async def get_context_files_(request: Request, project_id: str, context_id: str):
+    return await get_context_files(project_id, context_id)
 
 
 @router.post("/files/delete")

@@ -1,19 +1,17 @@
 from sqlalchemy import select
-from .types import ProjectFilesRequest, ContextFilesRequest
-from db.models import File, ContextFile
+from db.models import File, ContextFile, Context
 from api_service.database import db
 
 
-async def get_project_files(data: ProjectFilesRequest):
+async def get_project_files(project_id: str):
     async with db.session() as session:
-        file_query = select(File).where(File.project_id == data.project_id)
+        file_query = select(File).where(File.project_id == project_id)
         files = (await session.execute(file_query)).scalars().all()
         return files
 
 
-async def get_context_files(data: ContextFilesRequest):
+async def get_context_files(project_id: str, context_id: str):
     async with db.session() as session:
-        # file_contexts = select(file_context_association).where(file_context_association.c.context_id == data.context_id)
-        file_query = select(File).join(ContextFile).where(ContextFile.context_id == data.context_id)
+        file_query = select(File).join(ContextFile).where(ContextFile.context_id == context_id)
         files = (await session.execute(file_query)).scalars().all()
         return files

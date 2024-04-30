@@ -3,13 +3,13 @@ from api_service.clients import s3_client, qdrant
 from db.models import Context, File, ContextFile
 from datetime import datetime
 from api_service.database import db
-from db.enums import EmbeddingStatus, DocumentEmbeddingDistanceMetric
-from .types import CreateContextRequest, GetContextsRequest, GetContextsRequest, AddFileRequest, ProjectsContextRequest, ContextRequest
+from db.enums import DocumentEmbeddingDistanceMetric, EmbeddingStatus
+from .types import CreateContextRequest, AddFileRequest
 from sqlalchemy import select
-import io
 from qdrant_client.models import VectorParams
+from api_service.utils import partition_and_insert
 
-from .utils import get_context_by_readable_id, get_project_contexts, partition_and_insert
+from .utils import get_context_by_readable_id, get_project_contexts
 
 router = APIRouter(tags=["context"])
 
@@ -113,13 +113,16 @@ async def add_file(request: Request, data: AddFileRequest):
             raise HTTPException(status_code=409, detail="File is already associated with the context.")
         
         try:
-            fc = ContextFile(context_id=data.context_id, file_id=data.file_id, status=EmbeddingStatus.PENDING)
-            session.add(fc)
-
-            file_data = s3_client.download_file_as_obj(get_file_result.s3_key)
-            file_bytes = file_data['Body'].read()
-            file_stream = io.BytesIO(file_bytes)
-            partition_and_insert(file_stream, qdrant).delay()
+            new_context_file = ContextFile(
+                context_id=data.context_id,
+                file_id=data.file_id,
+                linked_at=datetime.utcnow(),
+                status=EmbeddingStatus.PENDING,
+            )
+            session.add(new_context_file)
+            await session.flush()
+            await session.refresh(new_context_file)
+            partition_and_insert.delay(data.context_id, get_file_result.id, get_file_result.s3_key, 40)
             await session.commit()
             return {"status": True}
         except Exception as ex:

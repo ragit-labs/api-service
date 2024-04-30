@@ -57,7 +57,7 @@ async def get_all_projects(request: Request, limit: int = 10, offset: int = 0):
 @router.get("/project/get/{project_id}")
 async def get_project(request: Request, project_id: str):
     async with db.session() as session:
-        get_project_query = select(Project).where(Project.readable_id == project_id.lower())
+        get_project_query = select(Project).where(Project.owner_id == request.state.user_id, Project.readable_id == project_id.lower())
         get_project_result = (await session.execute(get_project_query)).scalar_one_or_none()
         if get_project_result is None:
             raise HTTPException(status_code=404, detail=f"Project with id {project_id} not found.")

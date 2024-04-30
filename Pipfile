@@ -24,8 +24,6 @@ black = "*"
 mypy = "*"
 flake8 = "*"
 types-requests = "*"
-psycopg2-binary = "*"
-alembic = "*"
 isort = "*"
 
 [requires]
