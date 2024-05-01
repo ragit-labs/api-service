@@ -3,17 +3,23 @@ from datetime import datetime
 from ragit_db.enums import DocumentEmbeddingDistanceMetric, EmbeddingStatus
 from ragit_db.models import Context, ContextFile, File
 from fastapi import APIRouter, HTTPException, Request
-from qdrant_client.models import VectorParams
+from qdrant_client.models import VectorParams, PointStruct
 from sqlalchemy import select
+from ...utils import batch, create_text_embeddings, partition_and_insert
 
 from api_service.clients import qdrant, s3_client
 from api_service.database import db
-from api_service.utils import partition_and_insert
 
 from .types import AddFileRequest, CreateContextRequest
 from .utils import get_context_by_readable_id, get_project_contexts
+from unstructured.partition.pdf import partition_pdf
+import io
+from uuid import uuid4
+import logging
 
 router = APIRouter(tags=["context"])
+
+logger = logging.getLogger(__name__)
 
 
 @router.post("/context/create")
@@ -142,23 +148,55 @@ async def add_file(request: Request, data: AddFileRequest):
                 status_code=409, detail="File is already associated with the context."
             )
 
-        try:
-            new_context_file = ContextFile(
-                context_id=data.context_id,
-                file_id=data.file_id,
-                linked_at=datetime.utcnow(),
-                status=EmbeddingStatus.PENDING,
+        new_context_file = ContextFile(
+            context_id=data.context_id,
+            file_id=data.file_id,
+            linked_at=datetime.utcnow(),
+            status=EmbeddingStatus.PENDING,
+        )
+        session.add(new_context_file)
+        await session.flush()
+        await session.refresh(new_context_file)
+        meta = {   
+            "file_name": get_file_result.name,
+            "file_id": get_file_result.id,
+            "file_size": get_file_result.file_size,
+            "file_type": get_file_result.file_type,
+        }
+        partition_and_insert.delat(data.context_id, data.file_id, get_file_result.s3_key, meta, 60)
+        await session.commit()
+        return {"status": True}
+
+
+@router.get("/context/documents/{context_id}")
+async def get_documents(request: Request, context_id: str, limit: int = 10, offset: int = 0):
+    async with db.session() as session:
+        context_query = select(Context).where(Context.id == context_id)
+        context = (await session.execute(context_query)).scalar_one_or_none()
+        if not context:
+            raise HTTPException(status_code=404, detail="Context not found")
+        docs = qdrant.scroll(
+            collection_name=context_id, limit=limit, offset=offset, with_payload=True
+        )
+        return docs
+
+
+@router.delete("/context/delete/{context_id}")
+async def delete_context(request: Request, context_id: str):
+    async with db.session() as session:
+        context_query = select(Context).where(Context.id == context_id)
+        context = (await session.execute(context_query)).scalar_one_or_none()
+        if not context:
+            raise HTTPException(status_code=404, detail="Context not found")
+        context_files = (
+            await session.execute(
+                select(ContextFile).where(ContextFile.context_id == context_id)
             )
-            session.add(new_context_file)
-            await session.flush()
-            await session.refresh(new_context_file)
-            partition_and_insert.delay(
-                data.context_id, get_file_result.id, get_file_result.s3_key, 40
-            )
-            await session.commit()
-            return {"status": True}
-        except Exception as ex:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Could not add file to context. Error: {str(ex)}",
-            )
+        ).all()
+        for context_file in context_files:
+            session.delete(context_file)
+        await session.flush()
+        await session.delete(context)
+        qdrant.delete_collection(context_id)
+        await session.commit()
+        return {"status": True}

@@ -56,5 +56,4 @@ class Database:
         self.__sesssion_maker = None
         yield
 
-
 db = Database(settings.DATABASE_URL)

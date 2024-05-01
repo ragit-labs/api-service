@@ -11,6 +11,16 @@ class GetPresignedUrlRequest(BaseModel):
         title="Project ID",
         description="ID of the project to which the context belongs",
     )
+    file_size: int = Field(
+        ...,
+        title="File Size",
+        description="Size of the file in bytes",
+    )
+    file_type: str = Field(
+        ...,
+        title="File Type",
+        description="Type of the file",
+    )
 
 
 class MarkUploadStatusRequest(BaseModel):

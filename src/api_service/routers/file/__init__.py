@@ -30,6 +30,9 @@ async def get_presigned_url(request: Request, data: GetPresignedUrlRequest):
         project = (await session.execute(project_query)).scalar_one_or_none()
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
+        
+        if(data.file_size > 5 * 1024 * 1024):
+            raise HTTPException(status_code=400, detail="File size is too large")
 
         file = File(
             name=key,
@@ -39,6 +42,8 @@ async def get_presigned_url(request: Request, data: GetPresignedUrlRequest):
             project_id=data.project_id,
             owner_id=request.state.user_id,
             created_at=datetime.utcnow(),
+            file_size=data.file_size,
+            file_type=data.file_type,
         )
         session.add(file)
         await session.flush()

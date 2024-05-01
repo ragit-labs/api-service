@@ -55,4 +55,6 @@ app.include_router(auth.router)
 
 
 def main():
+    print("Creating datbaase....", settings.DATABASE_URL)
+    print("Creating Qdrant....", settings.QDRANT_SERVER_URI)
     uvicorn.run("api_service.__main__:app", host="0.0.0.0", port=8000, reload=True)
