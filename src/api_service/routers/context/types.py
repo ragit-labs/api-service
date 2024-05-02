@@ -91,3 +91,10 @@ class AddFileRequest(BaseModel):
     file_id: str = Field(
         ..., title="File ID", description="ID of the file to add to the context"
     )
+
+
+class SearchRequest(BaseModel):
+    context_id: str = Field(
+        ..., title="Context ID", description="ID of the context to search"
+    )
+    query: str = Field(..., title="Query", description="Query to search in the context")

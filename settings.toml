@@ -1,9 +1,10 @@
 [default]
 SENTRY_DSN = ""
 ALLOWED_HOSTS = ["*"]
-DATABASE_URL = "postgresql+asyncpg://ragit_admin:ragit1234@192.168.1.18:5432/ragit"
-S3_KEY = "DO00WLJRW9QCARE9ABEZ"
-S3_SECRET = "fJdnjgvlgv6xFTxEKJk+8wCiAE9I9ns5p1sMXnayD58"
+DATABASE_URL = "postgresql+asyncpg://ragit_admin:ragit1234@ragit-dev-db-do-user-16530468-0.c.db.ondigitalocean.com:25060/ragit"
+S3_KEY = "DO00VNTJM4RQEPZ2CA78"
+S3_SECRET = "2yRuzZQ8bYWsITI+XR843PGyG+8l7DMAdTN4GuUKeWQ"
 S3_URI = "https://blr1.digitaloceanspaces.com"
-QDRANT_SERVER_URI = "http://192.168.1.18:6333"
-REDIS_BROKER = "http://192.168.1.18:6379"
+QDRANT_SERVER_URI = "https://0f317029-822c-4347-af7f-501127b5eccb.us-east4-0.gcp.cloud.qdrant.io:6333"
+QDRANT_SERVER_SECRET = "u9Om7HrlsrvOTiqtrLWfR7A85vubBX0tTd4vtD99TBPaqVdovMbcqA"
+REDIS_BROKER = "redis://192.168.1.18:6379"

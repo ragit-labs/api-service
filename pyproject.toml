@@ -2,7 +2,7 @@
 name="api-service"
 version="0.0.1"
 description="API service that powers the web app for ragit"
-readme="README.md"
+readme="Readme.md"
 authors = ["Akash Mishra <akash@ragit.io>"]
 
 [tool.poetry.dependencies]

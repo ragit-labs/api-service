@@ -10,7 +10,7 @@ from ...utils import batch, create_text_embeddings, partition_and_insert
 from api_service.clients import qdrant, s3_client
 from api_service.database import db
 
-from .types import AddFileRequest, CreateContextRequest
+from .types import AddFileRequest, CreateContextRequest, SearchRequest
 from .utils import get_context_by_readable_id, get_project_contexts
 from unstructured.partition.pdf import partition_pdf
 import io
@@ -163,7 +163,7 @@ async def add_file(request: Request, data: AddFileRequest):
             "file_size": get_file_result.file_size,
             "file_type": get_file_result.file_type,
         }
-        partition_and_insert.delat(data.context_id, data.file_id, get_file_result.s3_key, meta, 60)
+        partition_and_insert.delay(data.context_id, data.file_id, get_file_result.s3_key, meta, 60)
         await session.commit()
         return {"status": True}
 
@@ -200,3 +200,17 @@ async def delete_context(request: Request, context_id: str):
         qdrant.delete_collection(context_id)
         await session.commit()
         return {"status": True}
+
+
+@router.post("/context/search")
+async def search_documents(request: Request, data: SearchRequest):
+    async with db.session() as session:
+        context_query = select(Context).where(Context.id == data.context_id)
+        context = (await session.execute(context_query)).scalar_one_or_none()
+        if not context:
+            raise HTTPException(status_code=404, detail="Context not found")
+        max_len = context.max_doc_length
+        query_embedding = list(create_text_embeddings([data.query], max_len, context.embedding_model))[0]
+        docs_to_retrieve = context.docs_to_retrieve
+
+    return qdrant.search(collection_name=data.context_id, query_vector=query_embedding.tolist(), limit=docs_to_retrieve)

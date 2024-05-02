@@ -4,7 +4,7 @@ from api_service.settings import settings
 
 from .s3 import S3Client
 
-qdrant = QdrantClient(settings.QDRANT_SERVER_URI)
+qdrant = QdrantClient(settings.QDRANT_SERVER_URI, api_key=settings.QDRANT_SERVER_SECRET)
 s3_client = S3Client(
     "ragit-file-uploads",
     settings.S3_URI,

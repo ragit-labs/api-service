@@ -17,6 +17,7 @@ from api_service.clients import qdrant, s3_client
 from api_service.database import db
 from api_service.types.embedding_model import EmbeddingModel
 from fastembed.embedding import TextEmbedding
+from time import time
 
 broker_uri = settings.REDIS_BROKER
 
@@ -35,7 +36,7 @@ def create_text_embeddings(
     model_name: str = EmbeddingModel.BAAI_BGE_BASE_EN,
 ):
     embedding_model = TextEmbedding(
-        model_name=model_name, max_length=max_length
+        model_name=model_name, max_length=max_length, cache_dir="cachee"
     )
     embeddings: List[np.ndarray] = embedding_model.embed(documents)
     return embeddings
@@ -61,9 +62,18 @@ def partition_and_insert(context_id: str, file_id: str, file_key: str, meta: dic
         raise HTTPException(
             status_code=500, detail=f"Could not download file from S3. {str(ex)}"
         )
+    s1 = time()
     file_bytes = file_data["Body"].read()
     file_stream = io.BytesIO(file_bytes)
+    e1 = time()
+    print(f"Downloaded file in {e1-s1} seconds")
+
+    s2 = time()
     partitions = partition_pdf(file=file_stream)
+    e2 = time()
+    print(f"Partitioned file in {e2-s2} seconds")
+
+
     for partition_batch in batch(partitions, batch_size):
         documents = []
         metadata = []
@@ -71,12 +81,17 @@ def partition_and_insert(context_id: str, file_id: str, file_key: str, meta: dic
             partition_data = partition.to_dict()
             documents.append(partition_data["text"])
             metadata.append(
-                {   
+                {
                     **meta,
                     "extra_metadata": partition_data["metadata"],
                 }
             )
+        s3 = time()
         embeddings = create_text_embeddings(documents, max_length=768)
+        e3 = time()
+        print(f"Embeddings created in {e3-s3} seconds")
+
+        s4 = time()
         qdrant.upsert(
             collection_name=context_id,
             points=[
@@ -92,6 +107,7 @@ def partition_and_insert(context_id: str, file_id: str, file_key: str, meta: dic
             ],
             wait=True,
         )
-        break
-    
+        e4 = time()
+        print(f"Embeddings inserted in {e4-s4} seconds")
+
     asyncio.run(update_status(context_id, file_id, EmbeddingStatus.FINISHED))
