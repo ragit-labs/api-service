@@ -25,3 +25,6 @@ var/
 
 .env
 node_modules
+
+
+.embeddings_model_cache/

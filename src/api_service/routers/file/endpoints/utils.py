@@ -1,4 +1,4 @@
-from ragit_db.models import Context, ContextFile, File
+from ragit_db.models import ContextFile, File
 from sqlalchemy import select
 
 from api_service.database import db

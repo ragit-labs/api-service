@@ -56,5 +56,6 @@ class Database:
         self.__sesssion_maker = None
         yield
 
+
 print("Creating datbase....", settings.DATABASE_URL)
 db = Database(settings.DATABASE_URL)

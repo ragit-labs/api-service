@@ -1,9 +1,9 @@
 from typing import Optional, Union
 
-from ragit_db.enums import DocumentEmbeddingDistanceMetric, DocumentSearchMode
 from pydantic import BaseModel, Field
+from ragit_db.enums import DocumentEmbeddingDistanceMetric, DocumentSearchMode
 
-from ...types.embedding_model import EmbeddingModel
+from ....types.embedding_model import EmbeddingModel
 
 
 class CreateContextRequest(BaseModel):
@@ -83,6 +83,17 @@ class GetContextsRequest(BaseModel):
 
 
 class AddFileRequest(BaseModel):
+    context_id: str = Field(
+        ...,
+        title="Context ID",
+        description="ID of the context to which the file belongs",
+    )
+    file_id: str = Field(
+        ..., title="File ID", description="ID of the file to add to the context"
+    )
+
+
+class DeleteFileRequest(BaseModel):
     context_id: str = Field(
         ...,
         title="Context ID",

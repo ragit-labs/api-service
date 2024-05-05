@@ -5,7 +5,7 @@ from sqlalchemy import select
 from api_service.database import db
 
 
-async def get_project_contexts(project_id: str):
+async def get_project_contexts(request: Request, project_id: str):
     async with db.session() as session:
         context_query = select(Context).where(Context.project_id == project_id)
         contexts = (await session.execute(context_query)).scalars().all()

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .dependencies.auth import login_required
 from .middlewares.logging import LoggingMiddleware
-from .routers import auth, context, embeddings, file, project
+from .routers import auth, chat, context, file, project
 from .settings import settings
 
 logging_config = {
@@ -50,8 +50,8 @@ app.add_middleware(
 app.include_router(file.router, dependencies=[Depends(login_required)])
 app.include_router(context.router, dependencies=[Depends(login_required)])
 app.include_router(project.router, dependencies=[Depends(login_required)])
-app.include_router(embeddings.router, dependencies=[Depends(login_required)])
 app.include_router(auth.router)
+app.include_router(chat.router)
 
 
 def main():

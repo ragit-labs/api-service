@@ -23,6 +23,9 @@ beautifulsoup4 = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 ragit-db = {"git" = "https://akashcodes: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@github.com/akashcodes/ragit-db.git", "branch" = "main"}
 fastembed = "^0.2.6"
+groq = "^0.5.0"
+pdfminer-six = "^20231228"
+langchain = "^0.1.17"
 
 [tool.poetry.dev-dependencies]
 black = "*"
@@ -38,7 +41,12 @@ build-backend = "poetry.core.masonry.api"
 [[tool.mypy.overrides]]
 module = [
     "dynaconf",
-    "jose"
+    "jose",
+    "boto3",
+    "ragit_db.*",
+    "botocore.*",
+    "fastembed.*",
+    "celery.*",
 ]
 ignore_missing_imports = true
 
