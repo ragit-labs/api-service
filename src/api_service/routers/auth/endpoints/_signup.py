@@ -6,15 +6,14 @@ from ragit_db.enums import ProjectPermission
 from ragit_db.models import Project, User, UserProject
 from sqlalchemy import select
 
-from api_service.database import db
-
 from ....constants import ACCESS_TOKEN_EXPIRE_MINUTES
+from ....database import db
 from ....utils.auth import create_access_token
 from ....utils.misc import sanitize_string
-from .types import SignupRequest
+from .types import SignupRequest, TAuthResponse
 
 
-async def signup(request: Request, data: SignupRequest):
+async def signup(request: Request, data: SignupRequest) -> TAuthResponse:
     async with db.session() as session:
 
         user_query = select(User).where(User.email == data.email)
@@ -60,11 +59,8 @@ async def signup(request: Request, data: SignupRequest):
         access_token = create_access_token(
             data={"user_id": str(user_id)}, expires_delta=access_token_expires
         )
-        return JSONResponse(
-            content={
-                "access_token": access_token,
-                "token_type": "Bearer",
-                "expiry": ACCESS_TOKEN_EXPIRE_MINUTES,
-            },
-            status_code=200,
+        return TAuthResponse(
+            access_token=access_token,
+            token_type="Bearer",
+            expiry=ACCESS_TOKEN_EXPIRE_MINUTES,
         )

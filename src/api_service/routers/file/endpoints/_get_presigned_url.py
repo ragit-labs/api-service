@@ -7,9 +7,8 @@ from ragit_db.enums import FileStatus
 from ragit_db.models import File, Project
 from sqlalchemy import select
 
-from api_service.clients import s3_client
-from api_service.database import db
-
+from ....clients import s3_client
+from ....database import db
 from ....utils.misc import sanitize_string
 from .types import GetPresignedUrlRequest
 

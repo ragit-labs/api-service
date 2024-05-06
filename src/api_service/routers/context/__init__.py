@@ -14,19 +14,19 @@ from .endpoints import (
 router = APIRouter(tags=["context"])
 router.add_api_route("/context/create", endpoint=create_context, methods=["POST"])
 router.add_api_route(
-    "/context/get/{project_id}/{readable_id}",
+    "/project/{project_id}/context/{readable_id}",
     endpoint=get_context_by_readable_id,
     methods=["GET"],
 )
 router.add_api_route(
-    "/context/get/{project_id}", endpoint=get_project_contexts, methods=["GET"]
+    "/project/{project_id}/contexts", endpoint=get_project_contexts, methods=["GET"]
 )
-router.add_api_route("/context/add_file", endpoint=add_file, methods=["POST"])
-router.add_api_route("/context/remove_file", endpoint=remove_file, methods=["POST"])
+router.add_api_route("/context/{context_id}/add_file", endpoint=add_file, methods=["POST"])
+router.add_api_route("/context/{context_id}/remove_file", endpoint=remove_file, methods=["POST"])
 router.add_api_route(
-    "/context/documents/{context_id}", endpoint=get_documents, methods=["GET"]
+    "/context/{context_id}/documents", endpoint=get_documents, methods=["GET"]
 )
 router.add_api_route(
-    "/context/delete/{context_id}", endpoint=delete_context, methods=["DELETE"]
+    "/context/{context_id}", endpoint=delete_context, methods=["DELETE"]
 )
-router.add_api_route("/context/search", endpoint=search_documents, methods=["POST"])
+# router.add_api_route("/context/search", endpoint=search_documents, methods=["POST"])

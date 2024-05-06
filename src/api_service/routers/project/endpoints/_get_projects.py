@@ -1,11 +1,13 @@
 from fastapi import Request
 from ragit_db.models import Project
 from sqlalchemy import select
+from typing import List
+from .types import TProject
 
-from api_service.database import db
+from ....database import db
 
 
-async def get_projects(request: Request, limit: int = 10, offset: int = 0):
+async def get_projects(request: Request, limit: int = 10, offset: int = 0) -> List[TProject]:
     owner_id = request.state.user_id
     async with db.session() as session:
         get_project_query = (
@@ -15,4 +17,13 @@ async def get_projects(request: Request, limit: int = 10, offset: int = 0):
             .offset(offset)
         )
         get_project_result = (await session.execute(get_project_query)).scalars().all()
-        return get_project_result
+        return [
+            TProject(
+                id=str(project.id),
+                readable_id=project.readable_id,
+                name=project.name,
+                description=project.description,
+                owner_id=str(project.owner_id),
+            )
+            for project in get_project_result
+        ]

@@ -2,7 +2,7 @@ from fastapi import Request
 from ragit_db.models import Context
 from sqlalchemy import select
 
-from api_service.database import db
+from ...database import db
 
 
 async def get_project_contexts(project_id: str):

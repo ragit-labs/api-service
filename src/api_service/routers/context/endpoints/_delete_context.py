@@ -2,8 +2,8 @@ from fastapi import HTTPException, Request
 from ragit_db.models import Context, ContextFile
 from sqlalchemy import select
 
-from api_service.clients import qdrant
-from api_service.database import db
+from ....clients import qdrant
+from ....database import db
 
 
 async def delete_context(request: Request, context_id: str):

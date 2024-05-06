@@ -6,9 +6,8 @@ from jose import JWTError, jwt
 from ragit_db.models import User
 from sqlalchemy import select
 
-from api_service.database import db
-
 from ..constants import JWT_ALGORITHM, JWT_DEFAULT_EXPIRY, JWT_SECRET_KEY
+from ..database import db
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):

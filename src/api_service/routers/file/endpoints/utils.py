@@ -1,7 +1,7 @@
 from ragit_db.models import ContextFile, File
 from sqlalchemy import select
 
-from api_service.database import db
+from ....database import db
 
 
 async def get_project_files(project_id: str):

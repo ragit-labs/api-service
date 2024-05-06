@@ -2,10 +2,9 @@ from fastapi import HTTPException, Request
 from ragit_db.models import Context
 from sqlalchemy import select
 
-from api_service.clients import qdrant
-from api_service.database import db
-from api_service.utils import create_text_embeddings
-
+from ....clients import qdrant
+from ....database import db
+from ....utils import create_text_embeddings
 from .types import SearchRequest
 
 

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from api_service.settings import settings
+from ..settings import settings
 
 
 class Database:

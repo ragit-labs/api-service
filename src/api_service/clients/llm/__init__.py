@@ -9,7 +9,7 @@ class LLMMessage(TypedDict):
     role: Required[str]
 
 
-async def invoke_groq(messages: List[LLMMessage]):
+async def invoke_groq(messages: List[dict]):
     groq_client = Groq(
         api_key="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"
     )

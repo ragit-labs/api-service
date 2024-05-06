@@ -6,9 +6,8 @@ from ragit_db.enums import DocumentEmbeddingDistanceMetric
 from ragit_db.models import Context
 from sqlalchemy import select
 
-from api_service.clients import qdrant
-from api_service.database import db
-
+from ....clients import qdrant
+from ....database import db
 from .types import CreateContextRequest
 
 

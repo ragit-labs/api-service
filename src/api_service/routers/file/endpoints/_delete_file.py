@@ -2,9 +2,8 @@ from fastapi import HTTPException, Request
 from ragit_db.models import File
 from sqlalchemy import select
 
-from api_service.clients import s3_client
-from api_service.database import db
-
+from ....clients import s3_client
+from ....database import db
 from .types import DeleteFileRequest
 
 

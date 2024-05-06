@@ -3,8 +3,7 @@ from ragit_db.enums import FileStatus
 from ragit_db.models import File
 from sqlalchemy import select
 
-from api_service.database import db
-
+from ....database import db
 from .types import MarkUploadStatusRequest
 
 

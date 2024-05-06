@@ -2,8 +2,7 @@ from fastapi import HTTPException, Request
 from ragit_db.models import Project
 from sqlalchemy import select
 
-from api_service.database import db
-
+from ....database import db
 from .types import CreateProjectRequest
 
 

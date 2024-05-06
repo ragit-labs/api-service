@@ -1,14 +1,16 @@
 from fastapi import HTTPException, Request
 from ragit_db.models import Context
 from sqlalchemy import select
+from .types import TDocument
+from typing import List
 
-from api_service.clients import qdrant
-from api_service.database import db
+from ....clients import qdrant
+from ....database import db
 
 
 async def get_documents(
-    request: Request, context_id: str, limit: int = 10, offset: int = 0
-):
+    request: Request, context_id: str, offset: str = None, limit: int = 10,
+) -> List[TDocument]:
     async with db.session() as session:
         context_query = select(Context).where(Context.id == context_id)
         context = (await session.execute(context_query)).scalar_one_or_none()
@@ -17,4 +19,14 @@ async def get_documents(
         docs = qdrant.scroll(
             collection_name=context_id, limit=limit, offset=offset, with_payload=True
         )
-        return docs
+        return [
+            TDocument(
+                id=doc.id,
+                context_id=context.id,
+                file_id=doc.payload["file_id"],
+                document=doc.payload["document"],
+                file_name=doc.payload["file_name"],
+                file_type=doc.payload["file_type"],
+            )
+            for doc in docs[0]
+        ]

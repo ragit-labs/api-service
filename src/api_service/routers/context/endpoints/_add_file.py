@@ -5,20 +5,15 @@ from ragit_db.enums import EmbeddingStatus
 from ragit_db.models import Context, ContextFile, File
 from sqlalchemy import select
 
-from api_service.database import db
 from embeddings_service import partition_and_insert
 
+from ....database import db
 from .types import AddFileRequest
 
 
-async def add_file(request: Request, data: AddFileRequest):
-    if not data.context_id:
-        raise HTTPException(status_code=400, detail="context_id is not in the request.")
-    if not data.file_id:
-        raise HTTPException(status_code=400, detail="file_id is not in the request.")
-
+async def add_file(request: Request, context_id: str, data: AddFileRequest):
     async with db.session() as session:
-        get_context_query = select(Context).where(Context.id == data.context_id)
+        get_context_query = select(Context).where(Context.id == context_id)
         get_context_result = (
             await session.execute(get_context_query)
         ).scalar_one_or_none()
@@ -31,7 +26,7 @@ async def add_file(request: Request, data: AddFileRequest):
             raise HTTPException(status_code=404, detail="File not found.")
 
         get_file_context_query = select(ContextFile).where(
-            ContextFile.context_id == data.context_id,
+            ContextFile.context_id == context_id,
             ContextFile.file_id == data.file_id,
         )
         get_file_context_result = (
@@ -43,7 +38,7 @@ async def add_file(request: Request, data: AddFileRequest):
             )
 
         new_context_file = ContextFile(
-            context_id=data.context_id,
+            context_id=context_id,
             file_id=data.file_id,
             linked_at=datetime.utcnow(),
             status=EmbeddingStatus.PENDING,
@@ -58,7 +53,7 @@ async def add_file(request: Request, data: AddFileRequest):
             "file_type": get_file_result.file_type,
         }
         partition_and_insert.delay(
-            data.context_id,
+            context_id,
             data.file_id,
             get_file_result.s3_key,
             meta,

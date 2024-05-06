@@ -25,7 +25,7 @@ celery_app = Celery(__name__, broker=broker_uri, backend=broker_uri)
 def batch(iterable, n=1):
     l = len(iterable)  # noqa
     for ndx in range(0, l, n):
-        yield iterable[ndx: min(ndx + n, l)]  # noqa
+        yield iterable[ndx : min(ndx + n, l)]  # noqa
 
 
 async def update_status(context_id: str, file_id: str, status: EmbeddingStatus):
