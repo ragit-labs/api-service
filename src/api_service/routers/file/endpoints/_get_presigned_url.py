@@ -10,10 +10,12 @@ from sqlalchemy import select
 from ....clients import s3_client
 from ....database import db
 from ....utils.misc import sanitize_string
-from .types import GetPresignedUrlRequest
+from .types import GetPresignedUrlRequest, PresignedUrl
 
 
-async def get_presigned_url(request: Request, data: GetPresignedUrlRequest):
+async def get_presigned_url(
+    request: Request, data: GetPresignedUrlRequest
+) -> PresignedUrl:
     key = data.key
     key_sanitized = sanitize_string(key)
     prefix = "".join(random.choice(string.ascii_letters) for i in range(6))
@@ -44,7 +46,7 @@ async def get_presigned_url(request: Request, data: GetPresignedUrlRequest):
         await session.flush()
         await session.commit()
         await session.refresh(file)
-        return {
-            "url": s3_client.create_presigned_url(key_sanitized, expiration),
-            "file_id": str(file.id),
-        }
+        return PresignedUrl(
+            url=s3_client.create_presigned_url(key_sanitized, expiration),
+            file_id=file.id,
+        )

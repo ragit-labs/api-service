@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ragit-api-service-deployment
+  labels:
+    app: ragit-api-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ragit-api-service
+  template:
+    metadata:
+      labels:
+        app: ragit-api-service
+    spec:
+      containers:
+      - name: ragit-api-service
+        image: rainmain/ragit-api-service:0.1
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8000
+        env:
+          - name: DYNACONF_REDIS_BROKER
+            value: "redis://ragit-api-service-redis.svc.cluster.local:6379"
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubernetes.digitalocean.com/load-balancer-name: "ragit-api-service"
+    # service.beta.kubernetes.io/do-loadbalancer-protocol: "https"
+    # service.beta.kubernetes.io/do-loadbalancer-certificate-id: "bf7fdde5-8825-45ad-bc9e-ef2e9dd76723"
+    # service.beta.kubernetes.io/do-loadbalancer-disable-lets-encrypt-dns-records: "false"
+  name: ragit-api-service
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8000
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: ragit-api-service
+  type: LoadBalancer

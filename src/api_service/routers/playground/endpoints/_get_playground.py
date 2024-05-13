@@ -5,10 +5,10 @@ from .utils import get_chat_history_by_id, get_playground_by_id
 
 
 async def get_playground(request: Request, playground_id: str) -> PlayGroundResponse:
+    print(playground_id)
     playground = await get_playground_by_id(playground_id)
     if not playground:
         raise HTTPException(status_code=404, detail="Playground not found")
-    chat_history = await get_chat_history_by_id(playground_id)
     return PlayGroundResponse(
         id=playground.id,
         name=playground.name,
@@ -17,5 +17,4 @@ async def get_playground(request: Request, playground_id: str) -> PlayGroundResp
         project_id=playground.project_id,
         context_id=playground.context_id,
         owner_id=playground.owner_id,
-        chat_history=chat_history,
     )

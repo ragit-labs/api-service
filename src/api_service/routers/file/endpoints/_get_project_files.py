@@ -1,10 +1,11 @@
+from typing import List
+
 from fastapi import Request
 from ragit_db.models import File
 from sqlalchemy import select
-from typing import List
-from .types import TFile
 
 from ....database import db
+from .types import TFile
 
 
 async def get_project_files(request: Request, project_id: str) -> List[TFile]:

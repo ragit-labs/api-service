@@ -27,6 +27,7 @@ class GetProjectRequest(BaseModel):
         ..., title="Project ID", description="ID of the project to get"
     )
 
+
 class TProject(BaseModel):
     id: str = Field(..., title="Project ID", description="Project's ID")
     readable_id: str = Field(

@@ -10,10 +10,44 @@ class ChatRequest(BaseModel):
         description="The query string to search for",
         min_length=2,
     )
-    context_id: Optional[str] = Field(
-        None,
+    context_id: str = Field(
+        ...,
         title="Context ID",
         description="The context ID to search in",
+    )
+    model: str = Field(
+        ...,
+        title="Model Provider",
+        description="The model provider to use",
+    )
+    model_params: dict = Field(
+        ...,
+        title="Model Parameters",
+        description="The model parameters to use",
+    )
+
+
+class CreatePlaygroundRequest(BaseModel):
+    project_id: str = Field(
+        ...,
+        title="Project ID",
+        description="The project ID to create the playground with",
+    )
+    context_id: str = Field(
+        ...,
+        title="Context ID",
+        description="The context ID to create the playground with",
+    )
+    name: str = Field(
+        ...,
+        title="Name",
+        description="The name of the playground",
+        min_length=2,
+    )
+    description: Optional[str] = Field(
+        None,
+        title="Description",
+        description="The description of the playground",
     )
 
 

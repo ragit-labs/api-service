@@ -21,8 +21,12 @@ router.add_api_route(
 router.add_api_route(
     "/project/{project_id}/contexts", endpoint=get_project_contexts, methods=["GET"]
 )
-router.add_api_route("/context/{context_id}/add_file", endpoint=add_file, methods=["POST"])
-router.add_api_route("/context/{context_id}/remove_file", endpoint=remove_file, methods=["POST"])
+router.add_api_route(
+    "/context/{context_id}/add_file", endpoint=add_file, methods=["POST"]
+)
+router.add_api_route(
+    "/context/{context_id}/remove_file", endpoint=remove_file, methods=["POST"]
+)
 router.add_api_route(
     "/context/{context_id}/documents", endpoint=get_documents, methods=["GET"]
 )

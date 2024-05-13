@@ -1,10 +1,11 @@
+from typing import List
+
 from fastapi import Request
 from ragit_db.models import ContextFile, File
 from sqlalchemy import select
-from .types import TFile
-from typing import List
 
 from ....database import db
+from .types import TFile
 
 
 async def get_context_files(request: Request, context_id: str) -> List[TFile]:

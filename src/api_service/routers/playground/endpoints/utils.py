@@ -62,8 +62,8 @@ async def get_playground_by_id(playground_id: str) -> Playground:
     async with db.session() as session:
         get_playground_query = select(Playground).where(Playground.id == playground_id)
         playground = (await session.execute(get_playground_query)).scalar_one_or_none()
-        if not playground:
-            raise HTTPException(status_code=404, detail="Playground not found")
+        # if not playground:
+        #     raise HTTPException(status_code=404, detail="Playground not found")
         return playground
 
 
@@ -105,8 +105,6 @@ async def get_chat_history_by_id(chat_history_id: str) -> ChatHistory:
         chat_history = (
             await session.execute(get_chat_history_query)
         ).scalar_one_or_none()
-        if not chat_history:
-            raise HTTPException(status_code=404, detail="Chat history not found")
         return chat_history
 
 

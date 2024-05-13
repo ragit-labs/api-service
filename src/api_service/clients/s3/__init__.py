@@ -49,6 +49,9 @@ class S3Client:
     def download_file_as_obj(self: S3Client, source_path: str):
         return self.client.get_object(Bucket=self.bucket_name, Key=source_path)
 
+    def save_obj_as_file(self: S3Client, obj: str, dest_path: str):
+        return self.client.put_object(Bucket=self.bucket_name, Key=dest_path, Body=obj)
+
     def create_presigned_post(self: S3Client, key: str, expiration: int = 300):
         return self.client.generate_presigned_post(
             self.bucket_name, key, ExpiresIn=expiration

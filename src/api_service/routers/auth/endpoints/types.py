@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
 from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
 class SignupRequest(BaseModel):
@@ -29,4 +30,3 @@ class TAuthResponse(BaseModel):
     access_token: str = Field(..., title="Access Token", description="Access Token")
     token_type: str = Field(..., title="Token Type", description="Token Type")
     expiry: int = Field(..., title="Expiry", description="Expiry")
-    user: TUser = Field(..., title="User", description="User")

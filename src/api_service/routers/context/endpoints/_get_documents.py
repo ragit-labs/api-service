@@ -1,15 +1,19 @@
+from typing import List
+
 from fastapi import HTTPException, Request
 from ragit_db.models import Context
 from sqlalchemy import select
-from .types import TDocument
-from typing import List
 
 from ....clients import qdrant
 from ....database import db
+from .types import TDocument
 
 
 async def get_documents(
-    request: Request, context_id: str, offset: str = None, limit: int = 10,
+    request: Request,
+    context_id: str,
+    offset: str = None,
+    limit: int = 10,
 ) -> List[TDocument]:
     async with db.session() as session:
         context_query = select(Context).where(Context.id == context_id)

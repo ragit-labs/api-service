@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ragit-api-service-worker-deployment
+  labels:
+    app: ragit-api-service-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ragit-api-service-worker
+  template:
+    metadata:
+      labels:
+        app: ragit-api-service-worker
+    spec:
+      containers:
+      - name: ragit-api-service-worker
+        image: rainmain/ragit-api-service-worker:0.1
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 6379
+        env:
+          - name: DYNACONF_REDIS_BROKER
+            value: "redis://ragit-api-service-redis.svc.cluster.local:6379"
+      imagePullSecrets:
+        - name: regcred

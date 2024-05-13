@@ -4,10 +4,12 @@ from ragit_db.models import File
 from sqlalchemy import select
 
 from ....database import db
-from .types import MarkUploadStatusRequest
+from .types import MarkSuccess, MarkUploadStatusRequest
 
 
-async def complete_upload(request: Request, data: MarkUploadStatusRequest):
+async def complete_upload(
+    request: Request, data: MarkUploadStatusRequest
+) -> MarkSuccess:
     async with db.session() as session:
         file_query = select(File).where(File.id == data.file_id)
         file = (await session.execute(file_query)).scalar_one_or_none()
@@ -16,4 +18,4 @@ async def complete_upload(request: Request, data: MarkUploadStatusRequest):
 
         file.status = FileStatus.FINISHED
         await session.commit()
-        return {"status": True}
+        return MarkSuccess(success=True)

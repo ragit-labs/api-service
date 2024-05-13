@@ -6,10 +6,10 @@ from ragit_db.models import Context
 from sqlalchemy import select
 
 from ....clients import qdrant
-from ....clients.llm import LLMMessage, invoke_groq
+from ....clients.llm import invoke_groq, invoke_openai
 from ....database import db
 from ....utils import create_text_embeddings
-from .types import ChatRequest
+from .types import ChatRequest, ChatResponse
 from .utils import (
     create_chat_history,
     create_playground,
@@ -50,7 +50,7 @@ def format_context(docs: List[str]):
     )
 
 
-async def chat(request: Request, playground_id: str, data: ChatRequest):
+async def chat(request: Request, playground_id: str, data: ChatRequest) -> ChatResponse:
 
     async with db.session() as session:
 
@@ -60,11 +60,11 @@ async def chat(request: Request, playground_id: str, data: ChatRequest):
         if not context:
             raise HTTPException(status_code=404, detail="Context not found")
 
-        if data.playground_id:
-            playground = await get_playground_by_id(data.playground_id)
-        else:
+        playground = await get_playground_by_id(playground_id)
+
+        if playground is None:
             pg_id = await create_playground(
-                data.playground_id,
+                playground_id,
                 str(datetime.utcnow()),
                 "",
                 context.project_id,
@@ -100,8 +100,15 @@ async def chat(request: Request, playground_id: str, data: ChatRequest):
                 ),
             }
         )
-
-        response = await invoke_groq(messages)
+        response = None
+        model_provider, model_name = data.model.split(":")
+        if model_provider == "groq":
+            response = await invoke_groq(messages, model_name=model_name, model_params=data.model_params)
+        elif model_provider == "openai":
+            response = await invoke_openai(messages, model_name=model_name, model_params=data.model_params)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid model provider")
+        
         ch_id = await create_chat_history(
             playground.id,
             request.state.user_id,
@@ -113,4 +120,15 @@ async def chat(request: Request, playground_id: str, data: ChatRequest):
             docs,
         )
         chat_history = await get_chat_history_by_id(ch_id)
-        return chat_history
+        return ChatResponse(
+            id=chat_history.id,
+            playground_id=playground.id,
+            user_id=chat_history.user_id,
+            system_prompt=chat_history.system_prompt,
+            user_prompt=chat_history.user_prompt,
+            model_response=chat_history.model_response,
+            model=chat_history.model,
+            model_params=chat_history.model_params,
+            documents=chat_history.documents,
+            created_at=str(chat_history.created_at),
+        )

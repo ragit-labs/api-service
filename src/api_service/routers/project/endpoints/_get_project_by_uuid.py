@@ -1,9 +1,9 @@
 from fastapi import HTTPException, Request
 from ragit_db.models import Project
 from sqlalchemy import select
-from .types import TProject
 
 from ....database import db
+from .types import TProject
 
 
 async def get_project_by_uuid(request: Request, project_id: str) -> TProject:

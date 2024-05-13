@@ -1,13 +1,16 @@
+from typing import List
+
 from fastapi import Request
 from ragit_db.models import Project
 from sqlalchemy import select
-from typing import List
-from .types import TProject
 
 from ....database import db
+from .types import TProject
 
 
-async def get_projects(request: Request, limit: int = 10, offset: int = 0) -> List[TProject]:
+async def get_projects(
+    request: Request, limit: int = 10, offset: int = 0
+) -> List[TProject]:
     owner_id = request.state.user_id
     async with db.session() as session:
         get_project_query = (

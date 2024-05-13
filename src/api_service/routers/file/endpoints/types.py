@@ -1,7 +1,6 @@
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class GetPresignedUrlRequest(BaseModel):
@@ -45,6 +44,7 @@ class GetFilesRequest(BaseModel):
 class DeleteFileRequest(BaseModel):
     file_id: str = Field(..., title="File ID")
 
+
 class TFile(BaseModel):
     id: str = Field(..., title="File ID")
     name: str = Field(..., title="File Name")
@@ -56,3 +56,12 @@ class TFile(BaseModel):
     file_size: int = Field(..., title="File Size")
     file_type: str = Field(..., title="File Type")
     extra_metadata: Optional[dict] = Field(None, title="Extra Metadata")
+
+
+class PresignedUrl(BaseModel):
+    url: str = Field(..., title="Presigned URL")
+    file_id: str = Field(..., title="File ID")
+
+
+class MarkSuccess(BaseModel):
+    success: bool = Field(..., title="Success")
