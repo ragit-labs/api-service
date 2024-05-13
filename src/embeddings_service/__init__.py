@@ -21,8 +21,6 @@ from unstructured.documents.elements import TYPE_TO_TEXT_ELEMENT_MAP
 from collections import defaultdict
 from uuid import uuid4
 
-from .agentic_chunker import AgenticChunker
-
 broker_uri = settings.REDIS_BROKER
 
 celery_app = Celery(__name__, broker=broker_uri, backend=broker_uri)
@@ -94,25 +92,6 @@ def pdf_chunk(text: str, chunksize):
     )
     partitions = splitter.split_text(text)
     return partitions
-
-
-def agentic_chunk(text: str, ichunksize: int = 1024, ioverlap: int = 128):
-    _partitions = recursive_chunk(text, ichunksize, ioverlap)
-    ac = AgenticChunker(
-        openai_api_key="sk-proj-FMnd5Ng5LlgMjqQwi2kqT3BlbkFJOR5D7bmsro9YrjqFdOwu"
-    )
-    ac.add_propositions(_partitions)
-    res = ac.get_chunks(get_type="dict")
-    partitions = []
-    for _, props in res.items():
-        partitions.append(
-            f"[Title: {props['title']}]"
-            + "\n\n"
-            + f"[Summary: {props['summary']}]"
-            + "\n\n"
-            + "\n\n".join(props["propositions"])
-        )
-    return res
 
 
 async def process(
