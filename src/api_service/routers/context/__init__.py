@@ -33,4 +33,4 @@ router.add_api_route(
 router.add_api_route(
     "/context/{context_id}", endpoint=delete_context, methods=["DELETE"]
 )
-# router.add_api_route("/context/search", endpoint=search_documents, methods=["POST"])
+router.add_api_route("/context/search", endpoint=search_documents, methods=["POST"])

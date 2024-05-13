@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Request
 
 from .types import PlayGroundResponse
-from .utils import get_chat_history_by_id, get_playground_by_id
+from .utils import get_playground_by_id
 
 
 async def get_playground(request: Request, playground_id: str) -> PlayGroundResponse:

@@ -1,11 +1,14 @@
-from fastapi import Request
-
-from .types import PlayGroundResponse, CreatePlaygroundRequest
-from .utils import create_playground
 from uuid import uuid4
 
+from fastapi import Request
 
-async def create_playground_(request: Request, data: CreatePlaygroundRequest) -> PlayGroundResponse:
+from .types import CreatePlaygroundRequest, PlayGroundResponse
+from .utils import create_playground
+
+
+async def create_playground_(
+    request: Request, data: CreatePlaygroundRequest
+) -> PlayGroundResponse:
     playground = await create_playground(
         playground_id=uuid4(),
         project_id=data.project_id,

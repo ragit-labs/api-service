@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from fastapi import HTTPException, Request
-from fastapi.responses import JSONResponse
 from ragit_db.models import User
 from sqlalchemy import select
 

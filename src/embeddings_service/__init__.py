@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from celery.app import Celery
 from fastapi import HTTPException
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pdfminer.high_level import extract_text
 from qdrant_client.models import PointStruct
 from ragit_db.enums import EmbeddingStatus
@@ -17,25 +17,10 @@ from api_service.clients import qdrant, s3_client
 from api_service.database import db
 from api_service.settings import settings
 from api_service.utils import create_text_embeddings
-from unstructured.documents.elements import TYPE_TO_TEXT_ELEMENT_MAP
-from collections import defaultdict
-from uuid import uuid4
 
 broker_uri = settings.REDIS_BROKER
 
 celery_app = Celery(__name__, broker=broker_uri, backend=broker_uri)
-
-
-def defval():
-    return 5
-
-
-prio = defaultdict(defval)
-prio[TYPE_TO_TEXT_ELEMENT_MAP['Title']] = 1
-prio[TYPE_TO_TEXT_ELEMENT_MAP['Section-header']] = 2
-prio[TYPE_TO_TEXT_ELEMENT_MAP['Headline']] = 3
-prio[TYPE_TO_TEXT_ELEMENT_MAP['Subheadline']] = 4
-prio[type(None)] = 0
 
 
 def batch(iterable, n=1):
@@ -86,13 +71,6 @@ def recursive_chunk(text: str, chunksize: int, overlap: int):
     partitions = splitter.split_text(text)
     return partitions
 
-def pdf_chunk(text: str, chunksize):
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunksize, chunk_overlap=0
-    )
-    partitions = splitter.split_text(text)
-    return partitions
-
 
 async def process(
     context_id: str,
@@ -119,11 +97,10 @@ async def process(
         e1 = time()
         print(f"Downloaded file in {e1-s1} seconds")
 
-        s2 = time()
         # partitions = partition_pdf(file=file_stream)
         pdf_text = extract_text(file_stream)
         # partitions = agentic_chunk(pdf_text)
-        partitions = recursive_chunk(pdf_text)
+        partitions = recursive_chunk(pdf_text, chunksize, overlap)
         # partitions = recursive_chunk(pdf_text, chunksize, overlap)
         new_key = str(uuid4()) + ".json"
         s3_client.save_obj_as_file(json.dumps(partitions), new_key)
@@ -131,7 +108,7 @@ async def process(
     else:
         try:
             partition_file_data = s3_client.download_file_as_obj(partition_key)
-        except:
+        except Exception as ex:
             raise HTTPException(
                 status_code=500, detail=f"Could not download file from S3. {str(ex)}"
             )

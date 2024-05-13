@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 from fastapi import HTTPException, Request
-from fastapi.responses import JSONResponse
 from ragit_db.enums import ProjectPermission
 from ragit_db.models import Project, User, UserProject
 from sqlalchemy import select

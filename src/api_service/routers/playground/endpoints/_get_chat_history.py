@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import HTTPException, Request
+from fastapi import Request
 
 from .types import ChatResponse
 from .utils import get_chat_history_by_playground_id

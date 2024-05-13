@@ -1,8 +1,9 @@
+from typing import Optional
+
 from fastapi import Request
 
 from ....utils.auth import get_user_from_database_using_id
 from .types import TUser
-from typing import Optional
 
 
 async def get_user(request: Request) -> Optional[TUser]:

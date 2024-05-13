@@ -1,6 +1,12 @@
 from fastapi import APIRouter
 
-from .endpoints import chat, get_chat_history, get_playground, get_playgrounds, create_playground_
+from .endpoints import (
+    chat,
+    create_playground_,
+    get_chat_history,
+    get_playground,
+    get_playgrounds,
+)
 
 router = APIRouter(tags=["playground"])
 router.add_api_route("/playground/{playground_id}/chat", chat, methods=["POST"])

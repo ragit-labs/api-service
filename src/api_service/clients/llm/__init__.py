@@ -17,7 +17,8 @@ async def invoke_groq(messages: List[dict], model_name: str, model_params: dict)
     groq_model = model_name
 
     chat_completion = groq_client.chat.completions.create(
-        messages=messages, model=groq_model,  # type: ignore
+        messages=messages,
+        model=groq_model,  # type: ignore
         temperature=model_params.get("temperature", 0.5),
         max_tokens=model_params.get("max_tokens", 1024),
         top_p=model_params.get("top_p", 1),
@@ -34,7 +35,8 @@ async def invoke_openai(messages: List[dict], model_name: str, model_params: dic
     )
     openai_model = model_name
     chat_completion = openai_client.chat.completions.create(
-        messages=messages, model=openai_model,  # type: ignore
+        messages=messages,
+        model=openai_model,  # type: ignore
         temperature=model_params.get("temperature", 0.5),
         max_tokens=model_params.get("max_tokens", 1024),
         top_p=model_params.get("top_p", 1),

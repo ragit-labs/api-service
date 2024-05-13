@@ -103,12 +103,16 @@ async def chat(request: Request, playground_id: str, data: ChatRequest) -> ChatR
         response = None
         model_provider, model_name = data.model.split(":")
         if model_provider == "groq":
-            response = await invoke_groq(messages, model_name=model_name, model_params=data.model_params)
+            response = await invoke_groq(
+                messages, model_name=model_name, model_params=data.model_params
+            )
         elif model_provider == "openai":
-            response = await invoke_openai(messages, model_name=model_name, model_params=data.model_params)
+            response = await invoke_openai(
+                messages, model_name=model_name, model_params=data.model_params
+            )
         else:
             raise HTTPException(status_code=400, detail="Invalid model provider")
-        
+
         ch_id = await create_chat_history(
             playground.id,
             request.state.user_id,

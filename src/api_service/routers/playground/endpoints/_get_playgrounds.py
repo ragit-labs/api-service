@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import HTTPException, Request
+from fastapi import Request
 from ragit_db.models import Playground
 from sqlalchemy import select
 
