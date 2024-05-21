@@ -58,6 +58,13 @@ class TFile(BaseModel):
     extra_metadata: Optional[dict] = Field(None, title="Extra Metadata")
 
 
+class TContextFile(BaseModel):
+    file_id: str = Field(..., title="File ID")
+    context_id: str = Field(..., title="Context ID")
+    name: str = Field(..., title="File Name")
+    status: str = Field(..., title="Status")
+
+
 class PresignedUrl(BaseModel):
     url: str = Field(..., title="Presigned URL")
     file_id: str = Field(..., title="File ID")

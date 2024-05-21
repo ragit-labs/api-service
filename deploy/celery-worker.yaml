@@ -5,7 +5,7 @@ metadata:
   labels:
     app: ragit-api-service-worker
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: ragit-api-service-worker
@@ -22,6 +22,6 @@ spec:
           - containerPort: 6379
         env:
           - name: DYNACONF_REDIS_BROKER
-            value: "redis://ragit-api-service-redis.svc.cluster.local:6379"
+            value: "redis://ragit-api-service-redis:6379"
       imagePullSecrets:
         - name: regcred

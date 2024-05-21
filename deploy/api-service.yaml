@@ -22,7 +22,9 @@ spec:
           - containerPort: 8000
         env:
           - name: DYNACONF_REDIS_BROKER
-            value: "redis://ragit-api-service-redis.svc.cluster.local:6379"
+            value: "redis://ragit-api-service-redis:6379"
+          - name: DYNACONF_DATABASE_URL
+            value: "postgresql+asyncpg://ragit_admin:ragit1234@private-ragit-dev-db-do-user-16530468-0.c.db.ondigitalocean.com:25060/ragit"
       imagePullSecrets:
         - name: regcred
 ---
@@ -31,9 +33,9 @@ kind: Service
 metadata:
   annotations:
     kubernetes.digitalocean.com/load-balancer-name: "ragit-api-service"
-    # service.beta.kubernetes.io/do-loadbalancer-protocol: "https"
-    # service.beta.kubernetes.io/do-loadbalancer-certificate-id: "bf7fdde5-8825-45ad-bc9e-ef2e9dd76723"
-    # service.beta.kubernetes.io/do-loadbalancer-disable-lets-encrypt-dns-records: "false"
+    service.beta.kubernetes.io/do-loadbalancer-protocol: "https"
+    service.beta.kubernetes.io/do-loadbalancer-certificate-id: "a9a9c392-c700-4e6f-a7e5-c392dce82d39"
+    service.beta.kubernetes.io/do-loadbalancer-disable-lets-encrypt-dns-records: "false"
   name: ragit-api-service
   namespace: default
 spec:
