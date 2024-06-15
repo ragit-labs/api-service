@@ -8,10 +8,7 @@ from .types import TProject
 
 async def get_project(request: Request, project_id: str) -> TProject:
     async with db.session() as session:
-        get_project_query = select(Project).where(
-            Project.owner_id == request.state.user_id,
-            Project.readable_id == project_id.lower(),
-        )
+        get_project_query = select(Project).where(Project.id == project_id, Project.owner_id == request.state.user_id)
         get_project_result = (
             await session.execute(get_project_query)
         ).scalar_one_or_none()

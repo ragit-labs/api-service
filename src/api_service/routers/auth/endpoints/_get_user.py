@@ -14,7 +14,9 @@ async def get_user(request: Request) -> Optional[TUser]:
             email=user.email,
             first_name=user.first_name,
             last_name=user.last_name,
-            signin_provider=user.signin_provider or "",
+            discord_id=user.discord_id,
+            discord_username=user.discord_username,
+            signin_provider=user.signin_provider,
             created_at=str(user.created_at),
         )
     return None

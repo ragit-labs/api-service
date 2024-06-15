@@ -8,9 +8,6 @@ class CreateProjectRequest(BaseModel):
     description: Optional[str] = Field(
         None, title="Project description", description="Description of the project"
     )
-    owner_id: str = Field(
-        ..., title="Owner ID", description="ID of the owner of the project"
-    )
 
 
 class GetProjectsRequest(BaseModel):
@@ -30,9 +27,6 @@ class GetProjectRequest(BaseModel):
 
 class TProject(BaseModel):
     id: str = Field(..., title="Project ID", description="Project's ID")
-    readable_id: str = Field(
-        ..., title="Readable ID", description="Project's Readable ID"
-    )
     name: str = Field(..., title="Name", description="Project's Name")
     owner_id: str = Field(..., title="Owner ID", description="Project's Owner ID")
     description: Optional[str] = Field(

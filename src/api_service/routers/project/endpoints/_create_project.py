@@ -4,18 +4,19 @@ from sqlalchemy import select
 
 from ....database import db
 from .types import CreateProjectRequest
+from ....utils.misc import sanitize_string
 
 
 async def create_project(request: Request, data: CreateProjectRequest):
 
     if not data.name:
         raise HTTPException(status_code=400, detail="name is not in the request.")
-    if not data.owner_id:
-        raise HTTPException(status_code=400, detail="owner_id is not in the request.")
+    
+    owner_id = request.state.user_id
 
     async with db.session() as session:
         get_project_query = select(Project).where(
-            Project.owner_id == data.owner_id, Project.name == data.name
+            Project.owner_id == owner_id, Project.name == data.name
         )
         get_project_result = (
             await session.execute(get_project_query)
@@ -30,7 +31,8 @@ async def create_project(request: Request, data: CreateProjectRequest):
             new_project = Project(
                 name=data.name,
                 description=data.description or "",
-                owner_id=data.owner_id,
+                owner_id=owner_id,
+                readable_id=sanitize_string(data.name).lower(),
             )
             session.add(new_project)
             await session.flush()

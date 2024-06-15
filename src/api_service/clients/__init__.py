@@ -1,9 +1,10 @@
-from qdrant_client import QdrantClient
+# from qdrant_client import QdrantClient
 
 from ..settings import settings
 from .s3 import S3Client
+from .discord import DiscordClient
 
-qdrant = QdrantClient(settings.QDRANT_SERVER_URI, api_key=settings.QDRANT_SERVER_SECRET)
+# qdrant = QdrantClient(settings.QDRANT_SERVER_URI, api_key=settings.QDRANT_SERVER_SECRET)
 s3_client = S3Client(
     settings.S3_BUCKET,
     settings.S3_URI,
@@ -12,4 +13,6 @@ s3_client = S3Client(
     settings.S3_SECRET,
 )
 
-__all__ = ["qdrant", "s3_client"]
+discord_client = DiscordClient(token=settings.DISCORD_BOT_TOKEN)
+
+__all__ = ["qdrant", "s3_client", "discord_client"]

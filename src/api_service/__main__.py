@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .dependencies.auth import login_required
 from .middlewares.logging import LoggingMiddleware
-from .routers import auth, context, file, playground, project
+from .routers import auth, source, project, demo, integrations, chat
 from .settings import settings
 
 logging_config = {
@@ -32,7 +32,7 @@ logging_config = {
 
 logging.config.dictConfig(logging_config)
 
-app = FastAPI(name="Arkive Web Service", debug=True)
+app = FastAPI(name="Ragit Web Service", debug=True)
 
 app.add_middleware(
     LoggingMiddleware,
@@ -47,14 +47,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(file.router, dependencies=[Depends(login_required)])
-app.include_router(context.router, dependencies=[Depends(login_required)])
+app.include_router(source.router, dependencies=[Depends(login_required)])
 app.include_router(project.router, dependencies=[Depends(login_required)])
 app.include_router(auth.router)
-app.include_router(playground.router, dependencies=[Depends(login_required)])
+app.include_router(demo.router)
+app.include_router(integrations.router, dependencies=[Depends(login_required)])
+app.include_router(chat.router)
 
 
 def main():
     print("Creating datbaase....", settings.DATABASE_URL)
-    print("Creating Qdrant....", settings.QDRANT_SERVER_URI)
     uvicorn.run("api_service.__main__:app", host="0.0.0.0", port=8000, reload=True)

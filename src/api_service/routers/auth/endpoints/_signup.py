@@ -1,14 +1,12 @@
 from datetime import datetime, timedelta
 
 from fastapi import HTTPException, Request
-from ragit_db.enums import ProjectPermission
-from ragit_db.models import Project, User, UserProject
+from ragit_db.models import User
 from sqlalchemy import select
 
 from ....constants import ACCESS_TOKEN_EXPIRE_MINUTES
 from ....database import db
 from ....utils.auth import create_access_token
-from ....utils.misc import sanitize_string
 from .types import SignupRequest, TAuthResponse
 
 
@@ -34,24 +32,6 @@ async def signup(request: Request, data: SignupRequest) -> TAuthResponse:
         await session.flush()
         await session.refresh(user)
         user_id = user.id
-        default_project_name = f"{data.first_name}'s Workspace"
-        project = Project(
-            name=default_project_name,
-            description="Default workspace for the user.",
-            owner_id=user_id,
-            readable_id=sanitize_string(default_project_name).lower(),
-        )
-        session.add(project)
-        await session.flush()
-        await session.refresh(project)
-        project_id = project.id
-        user_project = UserProject(
-            user_id=user_id,
-            project_id=project_id,
-            permission=ProjectPermission.OWNER,
-        )
-
-        session.add(user_project)
         await session.commit()
 
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

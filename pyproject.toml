@@ -6,7 +6,7 @@ readme="Readme.md"
 authors = ["Akash Mishra <akash@ragit.io>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.12"
+python = ">=3.10,<=3.12"
 fastapi = "*"
 boto3 = "*"
 uvicorn = "*"
@@ -14,18 +14,14 @@ dynaconf = "*"
 python-json-logger = "*"
 sqlalchemy = {extras = ["asyncio"], version = "*"}
 asyncpg = "*"
-qdrant-client = {extras = ["fastembed"], version = "*"}
-pandas = "*"
-pymupdf = "*"
 celery = {extras = ["redis"], version = "*"}
-beautifulsoup4 = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 ragit-db = {"git" = "https://akashcodes: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@github.com/akashcodes/ragit-db.git", "branch" = "main"}
-fastembed = "^0.2.6"
 groq = "^0.5.0"
-pdfminer-six = "^20231228"
-langchain = "^0.1.20"
 openai = "^1.29.0"
+pgvector = "^0.2.5"
+arq = "^0.26.0"
+langchain = "^0.2.4"
 
 [tool.poetry.dev-dependencies]
 black = "*"
